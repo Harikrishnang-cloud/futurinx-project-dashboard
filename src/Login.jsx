@@ -17,7 +17,6 @@ function Login({toLogin}){
         try {
             setLoading(true)
             await signInWithEmailAndPassword(auth,email,password)
-            toast.success("Login successful")
         } catch (error) {
             if(error.code === "auth/invalid-credential"){
                 toast.error("Invalid email or password")

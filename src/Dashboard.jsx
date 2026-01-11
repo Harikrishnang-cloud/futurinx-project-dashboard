@@ -76,7 +76,7 @@ function Dashboard({user}){
 
     const logout = async()=>{
         await signOut(auth)
-        toast.success("Logged out successfully")
+        
     }
 
     const deleteProject = async(id)=>{

@@ -17,7 +17,7 @@ function App(){
       setUser(u)
       setLoading(false)
       if(u){
-        toast.success(`Welcome ${u.displayName || "User"}`)
+        toast.success(`Login Successfully. Welcome ${u.displayName || "User"}`)
       }
       else{
         toast.success("Logout successfully  ")
