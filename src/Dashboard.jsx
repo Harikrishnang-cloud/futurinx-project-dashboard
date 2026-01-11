@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { signOut } from 'firebase/auth'
+import { signOut} from 'firebase/auth'
 import {auth} from "./firebase.jsx"
 import {db} from "./firebase.jsx"
 import toast from 'react-hot-toast'
-import { collection,addDoc,query,where,getDocs,deleteDoc,doc,serverTimestamp } from 'firebase/firestore'
+import { collection,addDoc,query,where,getDocs,deleteDoc,doc,serverTimestamp,updateDoc} from 'firebase/firestore'
 
 
 
@@ -19,6 +19,7 @@ function Dashboard({user}){
     const [name,setName] = useState("")
     const [description,setDescription] = useState("")
     const [loading,setLoading] = useState(false)
+    const [editingId,setEditingId] = useState(null)
 
     useEffect(()=>{
         if(!user){
@@ -112,7 +113,37 @@ function Dashboard({user}){
                 </div>
             </div>
         ),{duration:Infinity}
-    )
+      )
+    }
+
+    const startEdit = (project)=>{
+        setName(project.name)
+        setDescription(project.description)
+        setEditingId(project.id)
+    }
+
+    const EditProject = async()=>{
+        if(!name || !description){
+            toast.error("Project name and description required.")
+            return 
+        }
+        try{
+            setLoading(true);
+            await updateDoc(doc(db,"projects",editingId),{
+                name,description
+            })
+            toast.success("Project updated Successfully")
+            setName("")
+            setDescription("")
+            setEditingId(null)
+            fetchProjects()
+        }
+        catch(error){
+            toast.error(error.message,"Cannot update your Project")
+        }
+        finally{
+            setLoading(false)
+        }
     }
 
 
@@ -128,7 +159,9 @@ function Dashboard({user}){
             <div className='project-form'>
                 <input placeholder='Project-Name' value={name} onChange={(e)=>setName(e.target.value)}/>
                 <input placeholder='Description' value={description} onChange={(e)=>setDescription(e.target.value)}/>
-                <button onClick={addProject} disabled={loading}>{loading ? "Adding..." : "Add Project"}</button>
+                <button onClick={editingId ? EditProject : addProject} disabled={loading}>
+                    {loading?"Saving...":editingId ? "Update Project":"Add Project"}
+                </button>
             </div>
 
             <div className='project-list'>
@@ -140,6 +173,7 @@ function Dashboard({user}){
                         <p className='date'>
                             Created On:{p.createdAt ?. toDate().toLocaleString()}
                         </p>
+                        <button style={{marginRight:"8px",background:"#667eea"}}onClick={()=>startEdit(p)}>Edit</button>
                         <button onClick={()=>confirmDelete(()=> deleteProject(p.id))}>Delete</button>
                     </div>
                 ))}
